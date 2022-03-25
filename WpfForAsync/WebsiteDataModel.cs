@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WpfForAsync
 {
-    internal class WebsiteDataModel
+    public class WebsiteDataModel
     {
         public string WebsiteUrl { get; set; } = "";
         public string WebsiteData { get; set; } = "";

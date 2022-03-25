@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +22,7 @@ namespace WpfForAsync
     /// </summary>
     public partial class MainWindow : Window
     {
+        CancellationTokenSource  cts = new CancellationTokenSource();
         public MainWindow()
         {
             InitializeComponent();
@@ -28,92 +30,78 @@ namespace WpfForAsync
 
         private void normalButtom_Click(object sender, RoutedEventArgs e)
         {
-           
+            
             var watch = System.Diagnostics.Stopwatch.StartNew();// запускаем секундомер
-            RunDownloadSync();
+         var result = DemoMethods.RunDownloadSync();
+            PrintResults(result);
             watch.Stop();// останавливаем секундомер
             
             var elapsedMs = watch.ElapsedMilliseconds;
             textBlockWindow.Text += $"Total executaion time : {elapsedMs}";// показываем секунды
         }
-        private void RunDownloadSync()
+        private async void paralellAsyncButtom_Click(object sender, RoutedEventArgs e)
         {
-            var websites = PrepData();
-            foreach(string site in websites)
-            {
-                WebsiteDataModel results = DownloadWebsite(site);// берем дату и урл и  показываем урл 
-                ReportWebsiteInfo(results); // показываем урл ,дату   и /n 
-            }
-        }
-        private List<string> PrepData()
-        {
-            var output = new List<string>();
-            textBlockWindow.Text = "";
-            output.Add("https://www.google.com");
-            output.Add("https://www.yahoo.com");
-            output.Add("https://www.microsoft.com");
-            output.Add("https://www.codeproject.com");
-            output.Add("https://www.cnn.com");
-            output.Add("https://stackoverflow.com");
-            return output;
-        }
-        private WebsiteDataModel DownloadWebsite(string websiteUrl) // берем дату и урл
-        {
-            var output = new WebsiteDataModel();
-            WebClient client = new WebClient();//дает возможность работать с кодом страницы
-            output.WebsiteUrl = websiteUrl;
-           output.WebsiteData = client.DownloadString(websiteUrl);
-            return output;
-        }
-        private  async Task<WebsiteDataModel> DownloadWebsiteAsync(string websiteUrl) // берем дату и урл
-        {
-            var output = new WebsiteDataModel();
-            WebClient client = new WebClient();//дает возможность работать с кодом страницы
-            output.WebsiteUrl = websiteUrl;
-            output.WebsiteData = await client.DownloadStringTaskAsync(websiteUrl);
-            return output;
-        }
-        private void ReportWebsiteInfo(WebsiteDataModel data)// показываем урл ,дату   и /n 
-        {
-            textBlockWindow.Text += $"{data.WebsiteUrl} dowloaded: {data.WebsiteData.Length} characters long.{ Environment.NewLine}";
-        }
-     
-        private async Task RunDownloadAsync()// this ain't so dope!
-        {
-
-            var websites = PrepData();
-            foreach (string site in websites)
-            {
-                WebsiteDataModel results = await Task.Run(() => DownloadWebsite(site));// берем дату и урл и  показываем урл 
-                ReportWebsiteInfo(results); // показываем урл ,дату   и /n 
-            }
-        }
-        private async Task RunDownloadParalellAsync()//this is dope!
-        {
-
-            var websites = PrepData();
-            List<Task<WebsiteDataModel>> tasks = new List<Task<WebsiteDataModel>>();
-            foreach (string site in websites)
-            {
-               tasks.Add(DownloadWebsiteAsync(site));// берем дату и урл и  показываем урл 
-                
-            }
-          
-            WebsiteDataModel [] result = await Task.WhenAll(tasks);
-            foreach(WebsiteDataModel results in result)
-            {
-                ReportWebsiteInfo(results);
-            }
-           
-        }
-        private async void asyncButtom_Click(object sender, RoutedEventArgs e)
-        {
+            Progress<ProgressReportModel> progress = new Progress<ProgressReportModel>();
+            progress.ProgressChanged += ReportProgress;
             var watch = System.Diagnostics.Stopwatch.StartNew();// запускаем секундомер
-           await  RunDownloadParalellAsync();
+            try
+            {
+                var results = await DemoMethods.RunDownloadParalellAsync(progress/*,cts.Token*/);
+                PrintResults(results);
+            }
+            catch (OperationCanceledException)
+            {
+
+                textBlockWindow.Text += $"Dowload operation was cancelled{Environment.NewLine}";
+            }
             watch.Stop();// останавливаем секундомер
 
             var elapsedMs = watch.ElapsedMilliseconds;
             textBlockWindow.Text += $"Total executaion time : {elapsedMs}";// показываем секунды
         }
+        private async void AsyncButtom_Click(object sender, RoutedEventArgs e)
+        {
+            Progress<ProgressReportModel> progress = new Progress<ProgressReportModel>();
+            progress.ProgressChanged += ReportProgress;
+             var watch = System.Diagnostics.Stopwatch.StartNew();// запускаем секундомер
+
+            try
+            {
+                var results = await DemoMethods.RunDownloadAsync(progress, cts.Token);
+                PrintResults(results);
+            }
+            catch (OperationCanceledException)
+            {
+
+                textBlockWindow.Text += $"The async dowload  was cancelled{Environment.NewLine}";
+            }
+            watch.Stop();// останавливаем секундомер
+
+            var elapsedMs = watch.ElapsedMilliseconds;
+            textBlockWindow.Text += $"Total executaion time : {elapsedMs}";// показываем секунды
+        }
+
+        private void ReportProgress(object sender, ProgressReportModel e)
+        {
+            progressBar.Value = e.ParcentageCounter;
+            PrintResults(e.SitesDowloaded);
+        }
+
+        private void CancelButtom_Click(object sender, RoutedEventArgs e)
+        {
+           
+            cts.Cancel();
+
+        }
+        private void PrintResults(List<WebsiteDataModel> list)
+        {
+            textBlockWindow.Text = "";
+            foreach (WebsiteDataModel data in list)
+            {
+                textBlockWindow.Text += $"{data.WebsiteUrl} dowloaded: {data.WebsiteData.Length} characters long.{ Environment.NewLine}";
+            }
+        }
+
+        
     }
 }

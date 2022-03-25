@@ -7,10 +7,13 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid Margin="0,0,0,-6">
-        <Button x:Name="normalButtom" Content="Normal Execute" HorizontalAlignment="Center" Margin="0,63,0,0" VerticalAlignment="Top" Height="80" Width="800" FontSize="48" Click="normalButtom_Click"/>
-        <Button x:Name="asyncButtom" Content="Async Execute" HorizontalAlignment="Center" Margin="0,148,0,0" VerticalAlignment="Top" Height="80" Width="800" FontSize="48" Click="asyncButtom_Click"/>
+        <Button x:Name="normalButtom" Content="Normal Execute" HorizontalAlignment="Center" Margin="0,63,0,0" VerticalAlignment="Top" Height="41" Width="800" FontSize="24" Click="normalButtom_Click"/>
+        <Button x:Name="paralellAsyncButtom" Content="Parallel Async Execute" HorizontalAlignment="Center" Margin="0,104,0,0" VerticalAlignment="Top" Height="45" Width="800" FontSize="24" Click="paralellAsyncButtom_Click"/>
         <Label x:Name="topLabel" Content="Simple App For Async" HorizontalAlignment="Center" Margin="0,10,0,0" VerticalAlignment="Top" FontSize="24" Width="800" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Height="48"/>
-        <TextBlock x:Name="textBlockWindow" HorizontalAlignment="Left" Margin="0,233,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="197" Width="790"/>
+        <TextBlock x:Name="textBlockWindow" HorizontalAlignment="Center" Margin="0,243,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="187" Width="800"/>
+        <Button x:Name="asyncButtom" Content="Async Execute" HorizontalAlignment="Center" Margin="0,149,0,0" VerticalAlignment="Top" Height="39" Width="800" IsCancel="True" FontSize="24" Click="AsyncButtom_Click"/>
+        <Button x:Name="CancelButtom" Content="Cancel Operation" HorizontalAlignment="Center" Margin="0,188,0,0" VerticalAlignment="Top" Height="40" Width="800" FontSize="22" Click="CancelButtom_Click"/>
+        <ProgressBar x:Name="progressBar" HorizontalAlignment="Center" Height="15" Margin="0,228,0,0" VerticalAlignment="Top" Width="800"/>
 
     </Grid>
 </Window>
